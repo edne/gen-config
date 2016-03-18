@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
+import os
 from sys import argv
-# import i3
+import i3
 
 
 def write_conf():
@@ -194,13 +195,17 @@ new_float  pixel 1
     # main_color="#859900")
 
     if argv[1:]:
-        with open(argv[1], "w") as i3file:
-            i3file.write(config)
+        file_name = argv[1]
+    else:
+        file_name = os.path.expanduser("~") + "/.i3/config"
+
+    with open(file_name, "w") as i3file:
+        i3file.write(config)
 
 
 def i3_config():
     write_conf()
-    # i3.command("reload")
+    i3.command("reload")
 
 
 if __name__ == "__main__":
