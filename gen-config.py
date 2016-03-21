@@ -125,7 +125,7 @@ def gen_commads():
                  bindsym_exec("XF86ScreenSaver", "~/bin/lock"),
                  "",
                  bindsym_exec("Mod1+d",
-                              "PATH=$PATH:/home/edne/bin",
+                              "PATH=$PATH:~/bin",
                               "dmenu_run -nb \"#000000\" -nf \"#666666\"",
                               "-sb \"#000000\" -sf \"" + main_color + "\""),
                  "")
