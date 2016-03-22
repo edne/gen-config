@@ -15,6 +15,9 @@ import i3
 # main_color="#859900"
 main_color = "#6acf50"
 
+dmenu_colors = ("-nb \"#000000\" -nf \"#666666\" -sb \"#000000\" -sf \"{}\""
+                .format(main_color))
+
 
 def lines(*args):
     return "\n".join(args)
@@ -126,8 +129,13 @@ def gen_commads():
                  "",
                  bindsym_exec("Mod1+d",
                               "PATH=$PATH:~/bin",
-                              "dmenu_run -nb \"#000000\" -nf \"#666666\"",
-                              "-sb \"#000000\" -sf \"" + main_color + "\""),
+                              "dmenu_path | dmenu -p \"→\" {} | zsh &"
+                              .format(dmenu_colors)),
+
+                 bindsym_exec("Mod1+semicolon",
+                              "PATH=$PATH:~/bin",
+                              "stest -flx ~/bin | dmenu -p \"~\" -b {} | zsh &"
+                              .format(dmenu_colors)),
                  "")
 
 
