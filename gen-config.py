@@ -46,6 +46,25 @@ def mode(mode_name, *args):
 
 def gen_workspaces():
     return lines("# Workspaces",
+                 bindsym_exec("Mod1+Control+l", "i3-msg workspace next"),
+                 bindsym_exec("Mod1+Control+h", "i3-msg workspace prev"),
+
+                 bindsym_exec("Mod1+Shift+Control+l",
+                              "i3-msg move container to workspace next"),
+
+                 bindsym_exec("Mod1+Shift+Control+h",
+                              "i3-msg move container to workspace prev"),
+
+                 bindsym_exec("Mod1+Control+j",
+                              "i3-msg workspace back_and_forth"),
+
+                 bindsym_exec("Mod1+Shift+Control+j",
+                              "i3-msg move container to workspace"
+                              "back_and_forth"),
+
+                 bindsym("Mod1+Control+k", "scratchpad show"),
+                 bindsym("Mod1+Shift+Contrl+k", "move scratchpad"),
+
                  bindsym_exec("Mod1+space",
                               "i3-msg workspace $(lsws | menu)"),
 
@@ -53,8 +72,6 @@ def gen_workspaces():
                               "i3-msg move container to workspace",
                               "$(lsws | menu →)"),
 
-                 bindsym("Mod1+Shift+minus", "move scratchpad"),
-                 bindsym("Mod1+minus", "scratchpad show"),
                  "workspace 0 output VGA1",
                  "")
 
@@ -66,20 +83,10 @@ def gen_movement():
                  bindsym("Mod1+k", "focus up"),
                  bindsym("Mod1+l", "focus right"),
                  "",
-                 bindsym("Mod1+Left", "focus left"),
-                 bindsym("Mod1+Down", "focus down"),
-                 bindsym("Mod1+Up", "focus up"),
-                 bindsym("Mod1+Right", "focus right"),
-                 "",
                  bindsym("Mod1+Shift+h", "move left"),
                  bindsym("Mod1+Shift+j", "move down"),
                  bindsym("Mod1+Shift+k", "move up"),
                  bindsym("Mod1+Shift+l", "move right"),
-                 "",
-                 bindsym("Mod1+Shift+Left", "move left"),
-                 bindsym("Mod1+Shift+Down", "move down"),
-                 bindsym("Mod1+Shift+Up", "move up"),
-                 bindsym("Mod1+Shift+Right", "move right"),
                  "")
 
 
