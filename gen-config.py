@@ -3,7 +3,7 @@
 
 from __future__ import print_function
 import os
-from sys import argv
+import stat
 import i3
 
 # set $super Mod4
@@ -199,22 +199,28 @@ def gen_theme():
                  "new_float  pixel 1"
                  "")
 
+home = os.path.expanduser("~")
+local_path = home + "/bin"
+
+
+def gen_bash(name, code):
+    file_name = os.path.join(local_path, name)
+
+    code = lines("#!/bin/bash", code)
+
+    with open(file_name, "w") as f:
+        f.write(code)
+
+    st = os.stat(file_name)
+    os.chmod(file_name, st.st_mode | stat.S_IEXEC)
+
 
 def generate():
-    home = os.path.expanduser("~")
-    local_path = home + "/bin"
-
     dmenu_colors = ("-nb \"#000000\" -nf \"#666666\" -sb \"#000000\" -sf \"" +
                     main_color +
                     "\"")
 
-    menu_file = local_path + "/menu"
-    menu_run = lines("#!/bin/bash",
-                     "dmenu -p \"$1\" -b {}".format(dmenu_colors))
-
-    with open(menu_file, "w") as f:
-        f.write(menu_run)
-        # TODO: cmod +x
+    gen_bash("menu", "dmenu -p \"$1\" -b {}".format(dmenu_colors))
 
     i3_config = lines(gen_workspaces(),
                       gen_movement(),
