@@ -45,21 +45,18 @@ def mode(mode_name, *args):
 
 
 def gen_workspaces():
-    ws_list = ["~", "www", "irc", "music", "pineal",
-               "~", "~", "study", "~", "~"]
-
     return lines("# Workspaces",
+                 bindsym_exec("Mod1+space",
+                              "i3-msg workspace $(lsws | menu)"),
+
+                 bindsym_exec("Mod1+Shift+space",
+                              "i3-msg move container to workspace",
+                              "$(lsws | menu →)"),
+
                  bindsym("Mod1+Shift+minus", "move scratchpad"),
                  bindsym("Mod1+minus", "scratchpad show"),
-                 "",
                  "workspace 0 output VGA1",
-                 "",
-                 *[lines(bindsym("Mod1+{i}", "workspace {i}:{name}"),
-                         bindsym("Mod1+Shift+{i}",
-                                 "move container to workspace {i}:{name}"),
-                         "")
-                   .format(i=i, name=name)
-                   for (i, name) in enumerate(ws_list)])
+                 "")
 
 
 def gen_movement():
@@ -126,11 +123,11 @@ def gen_commads():
                  "",
                  bindsym_exec("Mod1+d",
                               "PATH=$PATH:~/bin",
-                              "dmenu_path | menu \"→\" | zsh &"),
+                              "dmenu_path | menu \"\" | zsh &"),
 
                  bindsym_exec("Mod1+semicolon",
                               "PATH=$PATH:~/bin",
-                              "stest -flx ~/bin | menu \"~\" | zsh &"),
+                              "stest -flx ~/bin | menu \"\" | zsh &"),
                  "")
 
 
@@ -203,10 +200,10 @@ home = os.path.expanduser("~")
 local_path = home + "/bin"
 
 
-def gen_bash(name, code):
+def gen_bash(name, *code):
     file_name = os.path.join(local_path, name)
 
-    code = lines("#!/bin/bash", code)
+    code = lines(*["#!/bin/bash"] + list(code) + [""])
 
     with open(file_name, "w") as f:
         f.write(code)
@@ -221,6 +218,10 @@ def generate():
                     "\"")
 
     gen_bash("menu", "dmenu -p \"$1\" -b {}".format(dmenu_colors))
+    gen_bash("lsws", "i3-msg -t get_workspaces |",
+                     "tr , '\n' |",
+                     "grep name |",
+                     "cut -d \\\" -f 4")
 
     i3_config = lines(gen_workspaces(),
                       gen_movement(),
