@@ -15,9 +15,6 @@ import i3
 # main_color="#859900"
 main_color = "#6acf50"
 
-dmenu_colors = ("-nb \"#000000\" -nf \"#666666\" -sb \"#000000\" -sf \"{}\""
-                .format(main_color))
-
 
 def lines(*args):
     return "\n".join(args)
@@ -129,13 +126,11 @@ def gen_commads():
                  "",
                  bindsym_exec("Mod1+d",
                               "PATH=$PATH:~/bin",
-                              "dmenu_path | dmenu -p \"→\" {} | zsh &"
-                              .format(dmenu_colors)),
+                              "dmenu_path | menu \"→\" | zsh &"),
 
                  bindsym_exec("Mod1+semicolon",
                               "PATH=$PATH:~/bin",
-                              "stest -flx ~/bin | dmenu -p \"~\" -b {} | zsh &"
-                              .format(dmenu_colors)),
+                              "stest -flx ~/bin | menu \"~\" | zsh &"),
                  "")
 
 
@@ -205,30 +200,38 @@ def gen_theme():
                  "")
 
 
-def gen_conf():
-    config = lines(gen_workspaces(),
-                   gen_movement(),
-                   gen_volume(),
-                   gen_actions(),
-                   gen_commads(),
-                   gen_windowing(),
-                   gen_bar(),
-                   gen_theme(),
-                   "")
+def generate():
+    home = os.path.expanduser("~")
+    local_path = home + "/bin"
 
-    if argv[1:]:
-        file_name = argv[1]
-    else:
-        file_name = os.path.expanduser("~") + "/.i3/config"
+    dmenu_colors = ("-nb \"#000000\" -nf \"#666666\" -sb \"#000000\" -sf \"" +
+                    main_color +
+                    "\"")
 
-    with open(file_name, "w") as i3file:
-        i3file.write(config)
+    menu_file = local_path + "/menu"
+    menu_run = lines("#!/bin/bash",
+                     "dmenu -p \"$1\" -b {}".format(dmenu_colors))
 
+    with open(menu_file, "w") as f:
+        f.write(menu_run)
+        # TODO: cmod +x
 
-def i3_config():
-    gen_conf()
+    i3_config = lines(gen_workspaces(),
+                      gen_movement(),
+                      gen_volume(),
+                      gen_actions(),
+                      gen_commads(),
+                      gen_windowing(),
+                      gen_bar(),
+                      gen_theme(),
+                      "")
+
+    i3_config_file = home + "/.i3/config"
+    with open(i3_config_file, "w") as f:
+        f.write(i3_config)
+
     i3.command("reload")
 
 
 if __name__ == "__main__":
-    i3_config()
+    generate()
