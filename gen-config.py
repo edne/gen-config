@@ -13,8 +13,10 @@ import i3
 # main_color="#4984bb"
 # main_color="#8787af"
 # main_color="#859900"
+
 main_color = "#6acf50"
 bg_color = "#000000"
+fg_color = "#999999"
 alert_color = "#f42e00"
 
 
@@ -181,14 +183,14 @@ def gen_bar():
                        "separator_symbol \" · \"",
                        block("colors",
                              row("background", bg_color),
-                             row("statusline", "#999999"),
+                             row("statusline", fg_color),
                              row("separator", main_color),
                              row("focused_workspace",
                                  main_color, bg_color, main_color),
                              row("active_workspace",
                                  bg_color, bg_color, "#5f676a"),
                              row("inactive_workspace",
-                                 bg_color, bg_color, "#999999"),
+                                 bg_color, bg_color, fg_color),
                              row("urgent_workspace",
                                  alert_color, bg_color, alert_color),
                              "")
@@ -202,13 +204,13 @@ def gen_theme():
                  row("client.focused",
                      main_color, bg_color, main_color, bg_color),
                  row("client.focused_inactive",
-                     "#999999", bg_color, "#999999", "#484e50"),
+                     fg_color, bg_color, fg_color, "#484e50"),
                  row("client.unfocused",
-                     "#222222", bg_color, "#999999 ", "292d2e"),
+                     "#222222", bg_color, fg_color, "292d2e"),
                  row("client.urgent",
-                     "#2f343a", "#900000", "#ffffff", alert_color),
+                     "#2f343a", bg_color, fg_color, alert_color),
                  row("client.placeholder",
-                     bg_color, "#0c0c0c", "#ffffff", bg_color),
+                     bg_color, "#0c0c0c", fg_color, bg_color),
 
                  "new_window pixel 1",
                  "new_float  pixel 1"
@@ -231,8 +233,10 @@ def gen_bash(name, *code):
 
 
 def generate():
-    dmenu_colors = ("-nb \"" + bg_color + "\" -nf \"#666666\" -sb \"" +
-                    bg_color + "\" -sf \"" + main_color + "\"")
+    dmenu_colors = ("-nb \"" + bg_color + "\"" +
+                    " -nf \"" + fg_color + "\"" +
+                    " -sb \"" + bg_color + "\"" +
+                    " -sf \"" + main_color + "\"")
 
     gen_bash("menu", "dmenu -p \"$1\" -b {}".format(dmenu_colors))
     gen_bash("lsws", "i3-msg -t get_workspaces |",
