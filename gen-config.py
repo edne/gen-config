@@ -63,7 +63,7 @@ def gen_workspaces():
                               "back_and_forth"),
 
                  bindsym("Mod1+Control+k", "scratchpad show"),
-                 bindsym("Mod1+Shift+Contrl+k", "move scratchpad"),
+                 bindsym("Mod1+Shift+Control+k", "move scratchpad"),
 
                  bindsym_exec("Mod1+space",
                               "i3-msg workspace $(lsws | menu)"),
@@ -148,7 +148,6 @@ def gen_windowing():
                  bindsym("Mod1+s", "layout stacking"),
                  bindsym("Mod1+w", "layout tabbed"),
                  bindsym("Mod1+e", "layout toggle split"),
-                 bindsym("Mod1+space", "focus mode_toggle"),
                  bindsym("Mod1+p", "focus parent"),
                  bindsym("Mod1+c", "focus child"),
 
