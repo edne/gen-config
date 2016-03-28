@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import stat
 
@@ -57,4 +58,14 @@ def bindsym_mode(sym, mode_name):
 
 def mode(mode_name, *args):
     return block("mode \"" + mode_name + "\"", *args)
+
+
+def i3bar_block(name, *args):
+    return block(name, *["{} = {}".format(*couple)
+                         for couple in zip(args[0::2], args[1::2])])
+
+
+def i3bar_order(*args):
+    return lines(*["order += {}".format(quotes(arg))
+                   for arg in args])
 #
