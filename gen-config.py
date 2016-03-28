@@ -17,7 +17,10 @@ import i3
 main_color = "#6acf50"
 bg_color = "#000000"
 fg_color = "#999999"
+smooth_color = "#333333"
 alert_color = "#f42e00"
+
+font = "Monaco"
 
 
 def row(*args):
@@ -179,7 +182,7 @@ def gen_bar():
                        "output            LVDS1",
                        "status_command    i3status",
                        "position          bottom",
-                       "font pango:DejaVu Sans Mono 7.5",
+                       "font xft:{} 7".format(font),
                        "separator_symbol \" · \"",
                        block("colors",
                              row("background", bg_color),
@@ -200,17 +203,17 @@ def gen_bar():
 
 def gen_theme():
     return lines("# Theme",
-                 "font pango:DejaVu Sans Mono 8",
+                 "font xft:{} 8".format(font),
                  row("client.focused",
                      main_color, bg_color, main_color, bg_color),
                  row("client.focused_inactive",
-                     fg_color, bg_color, fg_color, "#484e50"),
+                     smooth_color, bg_color, fg_color, bg_color),
                  row("client.unfocused",
-                     "#222222", bg_color, fg_color, "292d2e"),
+                     smooth_color, bg_color, fg_color, bg_color),
                  row("client.urgent",
-                     "#2f343a", bg_color, fg_color, alert_color),
+                     smooth_color, bg_color, fg_color, alert_color),
                  row("client.placeholder",
-                     bg_color, "#0c0c0c", fg_color, bg_color),
+                     smooth_color, bg_color, fg_color, bg_color),
 
                  "new_window pixel 1",
                  "new_float  pixel 1"
@@ -233,12 +236,13 @@ def gen_bash(name, *code):
 
 
 def generate():
-    dmenu_colors = ("-nb \"" + bg_color + "\"" +
-                    " -nf \"" + fg_color + "\"" +
-                    " -sb \"" + bg_color + "\"" +
-                    " -sf \"" + main_color + "\"")
+    gen_bash("menu", row("dmenu -p \"$1\" -b",
+                         "-fn {}-9".format(font),
+                         "-nb \"{}\"".format(bg_color),
+                         " -nf \"{}\"".format(fg_color),
+                         " -sb \"{}\"".format(bg_color),
+                         " -sf \"{}\"".format(main_color)))
 
-    gen_bash("menu", "dmenu -p \"$1\" -b {}".format(dmenu_colors))
     gen_bash("lsws", "i3-msg -t get_workspaces |",
                      "tr , '\n' |",
                      "grep name |",
