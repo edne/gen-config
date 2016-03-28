@@ -3,8 +3,10 @@
 
 from __future__ import print_function
 import os
-import stat
 import i3
+
+from utils import row, lines, quotes, write_file, write_bash
+from utils import block, bindsym, bindsym_exec, bindsym_mode, mode
 
 home = os.path.expanduser("~")
 local_path = os.path.join(home, "bin")
@@ -24,52 +26,6 @@ smooth_color = "#333333"
 alert_color = "#f42e00"
 
 font = "Monaco"
-
-
-def row(*args):
-    return " ".join(args)
-
-
-def lines(*args):
-    return "\n".join(args)
-
-
-def indent(*args):
-    return lines(*["    " + l for l in args])
-
-
-def gen_file(file_name, *body):
-    with open(file_name, "w") as f:
-        f.write(lines(*body))
-
-
-def gen_bash(name, *code):
-    file_name = os.path.join(local_path, name)
-
-    gen_file(file_name, "#!/bin/bash", *code)
-
-    st = os.stat(file_name)
-    os.chmod(file_name, st.st_mode | stat.S_IEXEC)
-
-
-def block(block_header, *args):
-    return block_header + " {\n" + indent(*args) + "\n}"
-
-
-def bindsym(sym, *command):
-    return "bindsym {} {}".format(sym, " ".join(command))
-
-
-def bindsym_exec(sym, *command):
-    return "bindsym {} exec {}".format(sym, " ".join(command))
-
-
-def bindsym_mode(sym, mode_name):
-    return "bindsym {} mode \"{}\"".format(sym, mode_name)
-
-
-def mode(mode_name, *args):
-    return block("mode \"" + mode_name + "\"", *args)
 
 
 def i3conf_workspaces():
@@ -158,11 +114,12 @@ def i3conf_commads():
                  "",
                  bindsym_exec("Mod1+d",
                               "PATH=$PATH:~/bin",
-                              "dmenu_path | menu \"\" | zsh &"),
+                              "dmenu_path | menu", quotes(""), "| zsh &"),
 
                  bindsym_exec("Mod1+semicolon",
                               "PATH=$PATH:~/bin",
-                              "stest -flx ~/bin | menu \"\" | zsh &"),
+                              "stest -flx ~/bin |",
+                              "menu", quotes(""), "| zsh &"),
                  "")
 
 
@@ -193,86 +150,6 @@ def i3conf_windowing():
 
 
 def i3conf_bar():
-    gen_file(os.path.join(home, ".i3status.conf"),
-             block("general",
-                   "colors = true",
-                   "color_degraded = \"{}\"".format(smooth_color),
-                   "color_good     = \"{}\"".format(main_color),
-                   "color_bad      = \"{}\"".format(alert_color),
-                   "output_format  = i3bar",
-                   "interval = 1"),
-
-             lines("order += \"volume master\"",
-                   # "order += \"ipv6\"",
-                   # "order += \"disk /\"",
-                   # "order += \"disk /home\"",
-                   # "order += \"run_watch DHCP\"",
-                   # "order += \"run_watch VPN\"",
-                   "order += \"wireless wlp3s0\"",
-                   "order += \"ethernet enp0s25\"",
-                   "order += \"ethernet tun0\"",
-                   "order += \"battery 0\"",
-                   "order += \"cpu_temperature 0\"",
-                   # "order += \"cpu_usage 0\"",
-                   # "order += \"load\"",
-                   "order += \"tztime local\""),
-
-             block("wireless wlp3s0",
-                   "format_up = \" %quality %essid %ip\"",
-                   "format_down = \"\""),
-
-             block("ethernet enp0s25",
-                   "format_up = \"%ip %speed\"",
-                   "format_down = \"\""),
-
-             block("ethernet tun0",
-                   "format_up = \"%ip %speed\"",
-                   "format_down = \"\""),
-
-             block("battery 0",
-                   "format = \"%status %percentage %remaining\"",
-                   "format_down = \"\"",
-                   "last_full_capacity = true",
-                   "integer_battery_capacity = true",
-                   "low_threshold = 11",
-                   "threshold_type = percentage",
-                   "hide_seconds = true",
-                   "status_chr = \" \"",
-                   "status_bat = \"\"  # TODO battery icon",
-                   "status_full = \" \""),
-
-             block("run_watch DHCP",
-                   "pidfile = \"/var/run/dhclient*.pid\""),
-
-             block("run_watch VPN",
-                   "pidfile = \"/var/run/vpnc/pid\""),
-
-             block("tztime local",
-                   "format = \"%A %e.%B %H:%M:%S\""),
-
-             block("load",
-                   "format = \" %1min\""),
-
-             block("cpu_usage",
-                   "format = \" %usage\""),
-
-             block("cpu_temperature 0",
-                   "format = \" %degrees°C\""),
-
-             block("disk \"/\"",
-                   "format = \"%free\""),
-
-             block("disk \"/home\"",
-                   "format = \" %free\""),
-
-
-             block("volume master",
-                   "format = \" %volume\"",
-                   "format_muted = \" --%%\"",
-                   "device = \"default\"",
-                   "mixer = \"Master\"",
-                   "mixer_idx = 0"))
-
     return lines("# Bar",
                  block("bar",
                        row("status_command", "i3status"),
@@ -280,7 +157,7 @@ def i3conf_bar():
                        row("status_command", "i3status"),
                        row("position", "bottom"),
                        "font xft:{} 7".format(font),
-                       row("separator_symbol \" · \""),
+                       row("separator_symbol", quotes(" · ")),
                        block("colors",
                              row("background", bg_color),
                              row("statusline", fg_color),
@@ -318,28 +195,99 @@ def i3conf_theme():
 
 
 def generate():
-    gen_bash("menu", row("dmenu -p \"$1\" -b",
-                         "-fn {}-9".format(font),
-                         "-nb \"{}\"".format(bg_color),
-                         " -nf \"{}\"".format(fg_color),
-                         " -sb \"{}\"".format(bg_color),
-                         " -sf \"{}\"".format(main_color)))
+    write_bash(local_path, "menu",
+               row("dmenu -b",
+                   "-p", quotes("$1"),
+                   "-fn {}-9".format(font),
+                   "-nb", quotes(bg_color),
+                   "-nf", quotes(fg_color),
+                   "-sb", quotes(bg_color),
+                   "-sf", quotes(main_color)))
 
-    gen_bash("lsws", "i3-msg -t get_workspaces |",
-                     "tr , '\n' |",
-                     "grep name |",
-                     "cut -d \\\" -f 4")
+    write_bash(local_path, "lsws",
+               "i3-msg -t get_workspaces |",
+               "tr , '\n' |",
+               "grep name |",
+               "cut -d \\\" -f 4")
 
-    gen_file(os.path.join(home, ".i3/config"),
-             i3conf_workspaces(),
-             i3conf_movement(),
-             i3conf_volume(),
-             i3conf_actions(),
-             i3conf_commads(),
-             i3conf_windowing(),
-             i3conf_bar(),
-             i3conf_theme(),
-             "")
+    write_file(os.path.join(home, ".i3status.conf"),
+               block("general",
+                     "colors = true",
+                     row("color_degraded =", quotes(smooth_color)),
+                     row("color_good     =", quotes(main_color)),
+                     row("color_bad      =", quotes(alert_color)),
+                     "output_format  = i3bar",
+                     "interval = 1"),
+
+               lines(row("order +=", quotes("volume master")),
+                     row("order +=", quotes("wireless wlp3s0")),
+                     row("order +=", quotes("ethernet enp0s25")),
+                     row("order +=", quotes("ethernet tun0")),
+                     row("order +=", quotes("battery 0")),
+                     row("order +=", quotes("cpu_temperature 0")),
+                     row("order +=", quotes("cpu_usage 0")),
+                     row("order +=", quotes("load")),
+                     row("order +=", quotes("tztime loca"))),
+
+               block("wireless wlp3s0",
+                     row("format_up =", quotes(" %quality %essid %ip")),
+                     row("format_down =", quotes(""))),
+
+               block("ethernet enp0s25",
+                     row("format_up =", quotes("%ip")),
+                     row("format_down =", quotes(""))),
+
+               block("ethernet tun0",
+                     row("format_up =", quotes("%ip")),
+                     row("format_down =", quotes(""))),
+
+               block("battery 0",
+                     row("format =", quotes("%status %percentage %remaining")),
+                     row("format_down =", quotes("")),
+                     "last_full_capacity = true",
+                     "integer_battery_capacity = true",
+                     "low_threshold = 11",
+                     "threshold_type = percentage",
+                     "hide_seconds = true",
+                     row("status_chr =", quotes(" ")),
+                     row("status_bat =", quotes("")),
+                     row("status_full =", quotes(" "))),
+
+               block("tztime local",
+                     row("format =", quotes("%A %e.%B %H:%M:%S"))),
+
+               block("load",
+                     row("format =", quotes(" %1min"))),
+
+               block("cpu_usage",
+                     row("format =", quotes(" %usage"))),
+
+               block("cpu_temperature 0",
+                     row("format =", quotes(" %degrees°C"))),
+
+               block(row("disk", quotes("/")),
+                     row("format =", quotes("%free"))),
+
+               block(row("disk", quotes("/home")),
+                     row("format =", quotes(" %free"))),
+
+               block("volume master",
+                     row("format =", quotes(" %volume")),
+                     row("format_muted =", quotes(" --%%")),
+                     row("device =", quotes("default")),
+                     row("mixer =", quotes("Master")),
+                     "mixer_idx = 0"))
+
+    write_file(os.path.join(home, ".i3/config"),
+               i3conf_workspaces(),
+               i3conf_movement(),
+               i3conf_volume(),
+               i3conf_actions(),
+               i3conf_commads(),
+               i3conf_windowing(),
+               i3conf_bar(),
+               i3conf_theme(),
+               "")
 
     i3.command("reload")
 
