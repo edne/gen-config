@@ -6,6 +6,9 @@ import os
 import stat
 import i3
 
+home = os.path.expanduser("~")
+local_path = os.path.join(home, "bin")
+
 # set $super Mod4
 # bindsym Mod1+n exec i3-input -F 'rename workspace to %s' -P 'New name: '
 
@@ -35,6 +38,20 @@ def indent(*args):
     return lines(*["    " + l for l in args])
 
 
+def gen_file(file_name, *body):
+    with open(file_name, "w") as f:
+        f.write(lines(*body))
+
+
+def gen_bash(name, *code):
+    file_name = os.path.join(local_path, name)
+
+    gen_file(file_name, "#!/bin/bash", *code)
+
+    st = os.stat(file_name)
+    os.chmod(file_name, st.st_mode | stat.S_IEXEC)
+
+
 def block(block_header, *args):
     return block_header + " {\n" + indent(*args) + "\n}"
 
@@ -55,7 +72,7 @@ def mode(mode_name, *args):
     return block("mode \"" + mode_name + "\"", *args)
 
 
-def gen_workspaces():
+def i3conf_workspaces():
     return lines("# Workspaces",
                  bindsym_exec("Mod1+Control+l", "i3-msg workspace next"),
                  bindsym_exec("Mod1+Control+h", "i3-msg workspace prev"),
@@ -87,7 +104,7 @@ def gen_workspaces():
                  "")
 
 
-def gen_movement():
+def i3conf_movement():
     return lines("# Movement",
                  bindsym("Mod1+h", "focus left"),
                  bindsym("Mod1+j", "focus down"),
@@ -101,7 +118,7 @@ def gen_movement():
                  "")
 
 
-def gen_volume():
+def i3conf_volume():
     return lines("# Volume",
                  bindsym_exec("XF86AudioRaiseVolume",
                               "amixer -q set Master 5%+ unmute"),
@@ -117,7 +134,7 @@ def gen_volume():
                  "")
 
 
-def gen_actions():
+def i3conf_actions():
     return lines("# Actions",
                  bindsym("Mod1+q", "kill"),
                  bindsym("Mod1+Shift+c", "reload"),
@@ -128,7 +145,7 @@ def gen_actions():
                  "")
 
 
-def gen_commads():
+def i3conf_commads():
     return lines("# Commands",
                  bindsym_exec("Print",
                               "scrot '%Y-%m-%d-%T_$wx$h.png'",
@@ -149,7 +166,7 @@ def gen_commads():
                  "")
 
 
-def gen_windowing():
+def i3conf_windowing():
     return lines("# Windowing",
                  bindsym("Mod1+o", "split h"),
                  bindsym("Mod1+v", "split v"),
@@ -175,15 +192,95 @@ def gen_windowing():
                  "")
 
 
-def gen_bar():
+def i3conf_bar():
+    gen_file(os.path.join(home, ".i3status.conf"),
+             block("general",
+                   "colors = true",
+                   "color_degraded = \"{}\"".format(smooth_color),
+                   "color_good     = \"{}\"".format(main_color),
+                   "color_bad      = \"{}\"".format(alert_color),
+                   "output_format  = i3bar",
+                   "interval = 1"),
+
+             lines("order += \"volume master\"",
+                   # "order += \"ipv6\"",
+                   # "order += \"disk /\"",
+                   # "order += \"disk /home\"",
+                   # "order += \"run_watch DHCP\"",
+                   # "order += \"run_watch VPN\"",
+                   "order += \"wireless wlp3s0\"",
+                   "order += \"ethernet enp0s25\"",
+                   "order += \"ethernet tun0\"",
+                   "order += \"battery 0\"",
+                   "order += \"cpu_temperature 0\"",
+                   # "order += \"cpu_usage 0\"",
+                   # "order += \"load\"",
+                   "order += \"tztime local\""),
+
+             block("wireless wlp3s0",
+                   "format_up = \" %quality %essid %ip\"",
+                   "format_down = \"\""),
+
+             block("ethernet enp0s25",
+                   "format_up = \"%ip %speed\"",
+                   "format_down = \"\""),
+
+             block("ethernet tun0",
+                   "format_up = \"%ip %speed\"",
+                   "format_down = \"\""),
+
+             block("battery 0",
+                   "format = \"%status %percentage %remaining\"",
+                   "format_down = \"\"",
+                   "last_full_capacity = true",
+                   "integer_battery_capacity = true",
+                   "low_threshold = 11",
+                   "threshold_type = percentage",
+                   "hide_seconds = true",
+                   "status_chr = \" \"",
+                   "status_bat = \"\"  # TODO battery icon",
+                   "status_full = \" \""),
+
+             block("run_watch DHCP",
+                   "pidfile = \"/var/run/dhclient*.pid\""),
+
+             block("run_watch VPN",
+                   "pidfile = \"/var/run/vpnc/pid\""),
+
+             block("tztime local",
+                   "format = \"%A %e.%B %H:%M:%S\""),
+
+             block("load",
+                   "format = \" %1min\""),
+
+             block("cpu_usage",
+                   "format = \" %usage\""),
+
+             block("cpu_temperature 0",
+                   "format = \" %degrees°C\""),
+
+             block("disk \"/\"",
+                   "format = \"%free\""),
+
+             block("disk \"/home\"",
+                   "format = \" %free\""),
+
+
+             block("volume master",
+                   "format = \" %volume\"",
+                   "format_muted = \" --%%\"",
+                   "device = \"default\"",
+                   "mixer = \"Master\"",
+                   "mixer_idx = 0"))
+
     return lines("# Bar",
                  block("bar",
-                       "status_command i3status",
-                       "output            LVDS1",
-                       "status_command    i3status",
-                       "position          bottom",
+                       row("status_command", "i3status"),
+                       row("output", "LVDS1"),
+                       row("status_command", "i3status"),
+                       row("position", "bottom"),
                        "font xft:{} 7".format(font),
-                       "separator_symbol \" · \"",
+                       row("separator_symbol \" · \""),
                        block("colors",
                              row("background", bg_color),
                              row("statusline", fg_color),
@@ -201,7 +298,7 @@ def gen_bar():
                  "")
 
 
-def gen_theme():
+def i3conf_theme():
     return lines("# Theme",
                  "font xft:{} 8".format(font),
                  row("client.focused",
@@ -219,21 +316,6 @@ def gen_theme():
                  "new_float  pixel 1"
                  "")
 
-home = os.path.expanduser("~")
-local_path = home + "/bin"
-
-
-def gen_bash(name, *code):
-    file_name = os.path.join(local_path, name)
-
-    code = lines(*["#!/bin/bash"] + list(code) + [""])
-
-    with open(file_name, "w") as f:
-        f.write(code)
-
-    st = os.stat(file_name)
-    os.chmod(file_name, st.st_mode | stat.S_IEXEC)
-
 
 def generate():
     gen_bash("menu", row("dmenu -p \"$1\" -b",
@@ -248,19 +330,16 @@ def generate():
                      "grep name |",
                      "cut -d \\\" -f 4")
 
-    i3_config = lines(gen_workspaces(),
-                      gen_movement(),
-                      gen_volume(),
-                      gen_actions(),
-                      gen_commads(),
-                      gen_windowing(),
-                      gen_bar(),
-                      gen_theme(),
-                      "")
-
-    i3_config_file = home + "/.i3/config"
-    with open(i3_config_file, "w") as f:
-        f.write(i3_config)
+    gen_file(os.path.join(home, ".i3/config"),
+             i3conf_workspaces(),
+             i3conf_movement(),
+             i3conf_volume(),
+             i3conf_actions(),
+             i3conf_commads(),
+             i3conf_windowing(),
+             i3conf_bar(),
+             i3conf_theme(),
+             "")
 
     i3.command("reload")
 
