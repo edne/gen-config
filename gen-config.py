@@ -51,7 +51,7 @@ def i3conf_workspaces():
                  bindsym("Mod1+Shift+Control+k", "move scratchpad"),
 
                  bindsym_exec("Mod1+space",
-                              "i3-msg workspace $(lsws | menu)"),
+                              "i3-msg workspace $(lsws | menu →)"),
 
                  bindsym_exec("Mod1+Shift+space",
                               "i3-msg move container to workspace",
@@ -67,6 +67,16 @@ def i3conf_movement():
                  bindsym("Mod1+j", "focus down"),
                  bindsym("Mod1+k", "focus up"),
                  bindsym("Mod1+l", "focus right"),
+                 "",
+                 bindsym("Mod4+h", "focus output left"),
+                 bindsym("Mod4+j", "focus output down"),
+                 bindsym("Mod4+k", "focus output up"),
+                 bindsym("Mod4+l", "focus output right"),
+                 "",
+                 bindsym("Mod4+Shift+h", "move workspace to output left"),
+                 bindsym("Mod4+Shift+j", "move workspace to output down"),
+                 bindsym("Mod4+Shift+k", "move workspace to output up"),
+                 bindsym("Mod4+Shift+l", "move workspace to output right"),
                  "",
                  bindsym("Mod1+Shift+h", "move left"),
                  bindsym("Mod1+Shift+j", "move down"),
@@ -115,12 +125,12 @@ def i3conf_commads():
                  "",
                  bindsym_exec("Mod1+d",
                               "PATH=$PATH:~/bin",
-                              "dmenu_path | menu", quotes(""), "| zsh &"),
+                              "dmenu_path | menu", quotes("-"), "| zsh &"),
 
                  bindsym_exec("Mod1+semicolon",
                               "PATH=$PATH:~/bin",
                               "stest -flx ~/bin |",
-                              "menu", quotes(""), "| zsh &"),
+                              "menu", quotes("-"), "| zsh &"),
                  "")
 
 
@@ -153,7 +163,7 @@ def i3conf_windowing():
 def i3conf_bar():
     return lines("# Bar",
                  block("bar",
-                       row("status_command", "i3status"),
+                       # row("status_command", "i3status"),
                        row("output", "LVDS1"),
                        row("status_command", "i3status"),
                        row("position", "bottom"),
@@ -178,7 +188,7 @@ def i3conf_bar():
 
 def i3conf_theme():
     return lines("# Theme",
-                 "font xft:{} 8".format(font),
+                 "font xft:{} 7".format(font),
                  row("client.focused",
                      main_color, bg_color, main_color, bg_color),
                  row("client.focused_inactive",
@@ -224,7 +234,7 @@ def generate():
 
                i3bar_block("general",
                            "colors", "true",
-                           "color_degraded", quotes(smooth_color),
+                           "color_degraded", quotes(fg_color),
                            "color_good", quotes(main_color),
                            "color_bad", quotes(alert_color),
                            "output_format", "i3bar",
