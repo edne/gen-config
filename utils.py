@@ -1,6 +1,4 @@
 from __future__ import print_function
-import os
-import stat
 
 
 def row(*args):
@@ -27,16 +25,6 @@ def write_file(file_name, *body):
     "Write lines on a file"
     with open(file_name, "w") as f:
         f.write(lines(*body))
-
-
-def write_bash(local_path, name, *code):
-    "Generate an executable bash script"
-    file_name = os.path.join(local_path, name)
-
-    write_file(file_name, "#!/bin/bash", *code)
-
-    st = os.stat(file_name)
-    os.chmod(file_name, st.st_mode | stat.S_IEXEC)
 
 
 # i3 stuff:
