@@ -2,31 +2,13 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-import os
 import i3
 
 from utils import row, lines, quotes, write_file, write_bash
 from utils import block, bindsym, bindsym_exec, bindsym_mode, mode
 from utils import i3bar_order, i3bar_block
 
-home = os.path.expanduser("~")
-local_path = os.path.join(home, "bin")
-
-# set $super Mod4
-# bindsym Mod1+n exec i3-input -F 'rename workspace to %s' -P 'New name: '
-
-# main_color="#87af5f"
-# main_color="#4984bb"
-# main_color="#8787af"
-# main_color="#859900"
-
-main_color = "#6acf50"
-bg_color = "#000000"
-fg_color = "#999999"
-smooth_color = "#333333"
-alert_color = "#f42e00"
-
-font = "Monaco"
+from config import path, color, font
 
 
 def i3conf_workspaces():
@@ -170,17 +152,17 @@ def i3conf_bar():
                        "font xft:{} 7".format(font),
                        row("separator_symbol", quotes(" · ")),
                        block("colors",
-                             row("background", bg_color),
-                             row("statusline", fg_color),
-                             row("separator", main_color),
+                             row("background", color.bg),
+                             row("statusline", color.fg),
+                             row("separator", color.main),
                              row("focused_workspace",
-                                 main_color, bg_color, main_color),
+                                 color.main, color.bg, color.main),
                              row("active_workspace",
-                                 bg_color, bg_color, "#5f676a"),
+                                 color.bg, color.bg, "#5f676a"),
                              row("inactive_workspace",
-                                 bg_color, bg_color, fg_color),
+                                 color.bg, color.bg, color.fg),
                              row("urgent_workspace",
-                                 alert_color, bg_color, alert_color),
+                                 color.alert, color.bg, color.alert),
                              "")
                        ),
                  "")
@@ -190,15 +172,15 @@ def i3conf_theme():
     return lines("# Theme",
                  "font xft:{} 7".format(font),
                  row("client.focused",
-                     main_color, bg_color, main_color, bg_color),
+                     color.main, color.bg, color.main, color.bg),
                  row("client.focused_inactive",
-                     smooth_color, bg_color, fg_color, bg_color),
+                     color.smooth, color.bg, color.fg, color.bg),
                  row("client.unfocused",
-                     smooth_color, bg_color, fg_color, bg_color),
+                     color.smooth, color.bg, color.fg, color.bg),
                  row("client.urgent",
-                     smooth_color, bg_color, fg_color, alert_color),
+                     color.smooth, color.bg, color.fg, color.alert),
                  row("client.placeholder",
-                     smooth_color, bg_color, fg_color, bg_color),
+                     color.smooth, color.bg, color.fg, color.bg),
 
                  "new_window pixel 1",
                  "new_float  pixel 1"
@@ -206,22 +188,22 @@ def i3conf_theme():
 
 
 def generate():
-    write_bash(local_path, "menu",
+    write_bash(path.local, "menu",
                row("dmenu -b",
                    "-p", quotes("$1"),
                    "-fn {}-9".format(font),
-                   "-nb", quotes(bg_color),
-                   "-nf", quotes(fg_color),
-                   "-sb", quotes(bg_color),
-                   "-sf", quotes(main_color)))
+                   "-nb", quotes(color.bg),
+                   "-nf", quotes(color.fg),
+                   "-sb", quotes(color.bg),
+                   "-sf", quotes(color.main)))
 
-    write_bash(local_path, "lsws",
+    write_bash(path.local, "lsws",
                "i3-msg -t get_workspaces |",
                "tr , '\n' |",
                "grep name |",
                "cut -d \\\" -f 4")
 
-    write_file(os.path.join(home, ".i3status.conf"),
+    write_file(path.i3status,
                i3bar_order("volume master",
                            "wireless wlp3s0",
                            "ethernet enp0s25",
@@ -234,9 +216,9 @@ def generate():
 
                i3bar_block("general",
                            "colors", "true",
-                           "color_degraded", quotes(fg_color),
-                           "color_good", quotes(main_color),
-                           "color_bad", quotes(alert_color),
+                           "color_degraded", quotes(color.fg),
+                           "color_good", quotes(color.main),
+                           "color_bad", quotes(color.alert),
                            "output_format", "i3bar",
                            "interval", "1"),
 
@@ -289,7 +271,7 @@ def generate():
                            "mixer", quotes("Master"),
                            "mixer_idx", "0"))
 
-    write_file(os.path.join(home, ".i3/config"),
+    write_file(path.i3,
                i3conf_workspaces(),
                i3conf_movement(),
                i3conf_volume(),
